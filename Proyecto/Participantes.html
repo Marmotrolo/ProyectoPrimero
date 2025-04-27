@@ -2,8 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Participantes</title>
+  <title id="titulo">PARTICIPANTES</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,7 +10,7 @@
   <header>
     <img id="logo" src="logo.png" alt="Logo instituto">
     <h1 id="titulo">PARTICIPANTES</h1>
-    <div id="navegacion">
+    <div id="botones">
       <button>Inicio</button>
       <button>Atrás</button>
     </div>
@@ -19,13 +18,13 @@
 
   <div id="contenido">
     <div class="tarjeta">
-      <button class="boton-tarjeta">Alta participante</button>
+      <button  class="boton-tarjeta" onclick="location.href='altaparticipantes.individual.html'">Alta participante</button>
     </div>
     <div class="tarjeta">
-      <button class="boton-tarjeta">Buscar participante</button>
+      <button class="boton-tarjeta" onclick="location.href='buscaparticipantes.html'" >Buscar participante</button>
     </div>
     <div class="tarjeta">
-      <button class="boton-tarjeta">Ver participantes</button>
+      <button class="boton-tarjeta" onclick="location.href='muestraparticipantes.html'" >Ver participantes</button>
     </div>
   </div>
 
