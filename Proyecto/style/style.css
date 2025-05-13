@@ -1,7 +1,7 @@
 body {
   margin: 0;
   font-family: Arial;
-  background: url('fondo.png') no-repeat center center fixed;
+  background: url('../imagenes/fondo.png') no-repeat center center fixed;
   background-size: cover;
   min-height: 100vh;
   display: flex;
@@ -9,11 +9,12 @@ body {
 }
 
 header {
-  background: #8cc0d7;
-  padding: 20px;
+ background-color: #8cc0d7;
   display: flex;
-  align-items: center;  /* Centra verticalmente todos los elementos */
-  gap: 20px;           /* Espacio entre elementos */
+  justify-content: center; /* Centra el título horizontalmente */
+  align-items: center;     /* Centra el título verticalmente */
+  padding: 20px;
+  position: relative;
 }
 
 #logo {
@@ -21,7 +22,7 @@ header {
 }
 
 #titulo {
-  margin: 0;           /* Elimina el margen por defecto del h1 */
+  margin-left: 90px;           /* Elimina el margen por defecto del h1 */
   font-size: 28px;
   font-weight: bold;
   color: black;

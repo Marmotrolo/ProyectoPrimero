@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Alta Participantes</title>
+  <link rel="stylesheet" href="style/style.css">
+</head>
+<body>
+
+<header>
+  <a href="index.html">
+    <a href="https://blogsaverroes.juntadeandalucia.es/iestorrredelosguzmanes/"><img id="logo" src="imagenes/logo.png" alt="Logo instituto"></a>
+  </a>
+  <h1 id="titulo">MODIFICAR GRUPO</h1>
+</header>
+
+<div id="formulario">
+  <form action="procesar-grupo.php" method="POST">
+    <div>
+    Curso Educativo
+      <select>
+      
+        <option value="1ESO">1º de ESO</option>
+        <option value="2ESO">2º de ESO</option>
+      
+      
+    </select>
+    <div >
+      <label>Nombre del grupo</label>
+      <input type="text" name="participante1">
+    </div>
+      <div >
+        <label>Nombre y apellidos del participante</label>
+        <input type="text" name="participante1">
+      </div>
+
+      <div>
+        <label>Nombre y apellidos del participante 2</label>
+        <input type="text" name="participante2">
+      </div>
+
+      <div >
+        <label>Nombre y apellidos del participante 3</label>
+        <input type="text" name="participante3">
+      </div>
+
+      <div >
+        <label>Nombre y apellidos del participante 4</label>
+        <input type="text" name="participante4">
+      </div>
+
+      <div >
+        <label>Nombre y apellidos del participante 5</label>
+        <input type="text" name="participante5">
+      </div>
+    </div>
+
+    <div class="botones">
+      <a href="./index principal.html"><button>Inicio</button></a>
+      <button onclick="window.history.back()">Atrás</button>
+
+    </div>
+  </form>
+</div>
+
+</body>
+</html>
