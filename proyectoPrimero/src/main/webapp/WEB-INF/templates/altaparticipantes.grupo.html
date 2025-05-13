@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Alta Participantes</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <a href="index.html">
+    <a href="https://blogsaverroes.juntadeandalucia.es/iestorrredelosguzmanes/"><img id="logo" src="logo.png" alt="Logo instituto"></a>
+  </a>
+  <h1 id="titulo">ALTA PARTICIPANTES GRUPO</h1>
+</header>
+
+<div id="formulario">
+  <form action="procesar-grupo.php" method="POST">
+    <div class="grupo-campos">
+      <div class="campo">
+        <label>Nombre y apellidos del participante</label>
+        <input type="text" name="participante1">
+      </div>
+
+      <div class="campo">
+        <label>Nombre y apellidos del participante 2</label>
+        <input type="text" name="participante2">
+      </div>
+
+      <div class="campo">
+        <label>Nombre y apellidos del participante 3</label>
+        <input type="text" name="participante3">
+      </div>
+
+      <div class="campo">
+        <label>Nombre y apellidos del participante 4</label>
+        <input type="text" name="participante4">
+      </div>
+
+      <div class="campo">
+        <label>Nombre y apellidos del participante 5</label>
+        <input type="text" name="participante5">
+      </div>
+    </div>
+
+    <div class="botones">
+      <button type="button" onclick="window.history.back()">Atrás</button>
+      
+      <button type="submit">Enviar</button>
+
+    </div>
+  </form>
+</div>
+
+</body>
+</html>
