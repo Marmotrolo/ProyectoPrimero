@@ -1,30 +1,26 @@
-create database competicion_deportiva;
-use competicion_deportiva;
-
+-- Tabla principal de participantes
 CREATE TABLE Participantes (
-  Id_participante INT PRIMARY KEY,
-  Nombre VARCHAR(100),
-  Curso VARCHAR(100)
+  Id_participante INT AUTO_INCREMENT PRIMARY KEY,
+  Nombre VARCHAR(100) NOT NULL,
+  Curso VARCHAR(10) NOT NULL CHECK (Curso IN ('1ESO', '2ESO')),
+  Tipo ENUM('INDIVIDUAL', 'GRUPO') NOT NULL
 );
 
-CREATE TABLE ParticipanteIndividual (
+-- Tabla para grupos (extiende Participantes)
+CREATE TABLE Grupos (
   Id_participante INT PRIMARY KEY,
+  Nombre_grupo VARCHAR(100) NOT NULL,
   FOREIGN KEY (Id_participante) REFERENCES Participantes(Id_participante)
+  ON DELETE CASCADE
 );
 
-CREATE TABLE Grupo (
-  Id_participante INT PRIMARY KEY,
-  Nombre_Grupo VARCHAR(100),
-  FOREIGN KEY (Id_participante) REFERENCES Participantes(Id_participante)
-);
-
-
-CREATE TABLE ParticipanteGrupo (
-  Id_Participante INT,
-  Id_Grupo INT,
-  PRIMARY KEY (Id_Participante, Id_Grupo),
-  FOREIGN KEY (Id_Participante) REFERENCES Participantes(Id_participante),
-  FOREIGN KEY (Id_Grupo) REFERENCES Grupo(Id_participante)
+-- Tabla para miembros de grupos (relación muchos a muchos)
+CREATE TABLE MiembrosGrupo (
+  Id_grupo INT NOT NULL,
+  Id_participante INT NOT NULL,
+  PRIMARY KEY (Id_grupo, Id_participante),
+  FOREIGN KEY (Id_grupo) REFERENCES Grupos(Id_participante) ON DELETE CASCADE,
+  FOREIGN KEY (Id_participante) REFERENCES Participantes(Id_participante) ON DELETE CASCADE
 );
 
 -- Usuario de prueba
