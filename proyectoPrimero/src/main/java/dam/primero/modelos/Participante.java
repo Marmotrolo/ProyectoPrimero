@@ -6,16 +6,23 @@ public class Participante {
     private String nombre;
     private String curso;
     protected String tipo; 
+    
+    
     public Participante() {
     	super();
     }
 
-    public Participante(int id, String nombre, String curso, String tipo) {
-        this.id = id;
+    public Participante( String nombre, String curso, String tipo) {
+    
         this.nombre = nombre;
         this.curso = curso;
         this.tipo = tipo;
+        
     }
+
+	public Participante(String curso2, String nombreGrupo) {
+		// TODO Auto-generated constructor stub
+	}
 
 	public int getId() {
 		return id;

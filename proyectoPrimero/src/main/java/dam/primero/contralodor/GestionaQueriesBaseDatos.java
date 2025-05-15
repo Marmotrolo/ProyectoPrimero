@@ -1,7 +1,9 @@
 package dam.primero.contralodor;
 
-import dam.primero.dao.*;
-import dam.primero.modelos.*;
+import dam.primero.dao.ParticipanteDaoImpl;
+import dam.primero.modelos.ParticipanteIndividual;
+import dam.primero.modelos.Grupo;
+import dam.primero.modelos.Participante;
 
 import java.util.Scanner;
 import java.util.List;
@@ -9,85 +11,121 @@ import java.util.List;
 public class GestionaQueriesBaseDatos {
 
     public static void main(String[] args) {
-        try (
-            Scanner sc = new Scanner(System.in)
-        ) {
-            ParticipanteIndividualDao individualDao = new ParticipanteIndividualDao();
-            GrupoDao grupoDao = new GrupoDao();
-            ParticipanteGrupoDao participanteGrupoDao = new ParticipanteGrupoDao();
+        try (Scanner sc = new Scanner(System.in)) {
+            ParticipanteDaoImpl participanteDao = new ParticipanteDaoImpl();
+            int opcion = -1;
 
-            int opcion = 1 ;
-        while (opcion != 0) {
-                System.out.println("\n=== Menú de Gestión Deportiva ===");
-                System.out.println("1. Insertar participante individual");
-                System.out.println("2. Insertar grupo");
-                System.out.println("3. Relacionar participante con grupo");
-                System.out.println("4. Mostrar participantes individuales");
-                System.out.println("5. Mostrar grupos");
-                System.out.println("6. Mostrar relaciones participante-grupo");
-                System.out.println("0. Salir");
-                System.out.print("Elige una opción: ");
+            while (opcion != 0) {
+                mostrarMenu();
                 opcion = Integer.parseInt(sc.nextLine());
 
                 switch (opcion) {
                     case 1:
-                        System.out.print("ID: ");
-                        int idP = Integer.parseInt(sc.nextLine());
-                        System.out.print("Nombre: ");
-                        String nombreP = sc.nextLine();
-                        System.out.print("Curso: ");
-                        String cursoP = sc.nextLine();
-                        individualDao.insertar(new ParticipanteIndividual(idP, nombreP, cursoP));
-                        System.out.println("✔ Participante individual insertado.");
+                        insertarParticipanteIndividual(sc, participanteDao);
                         break;
-
                     case 2:
-                        System.out.print("ID: ");
-                        int idG = Integer.parseInt(sc.nextLine());
-                        System.out.print("Nombre responsable del grupo: ");
-                        String nombreG = sc.nextLine();
-                        System.out.print("Curso: ");
-                        String cursoG = sc.nextLine();
-                        System.out.print("Nombre del grupo: ");
-                        String nombreGrupo = sc.nextLine();
-                        grupoDao.insertar(new Grupo(idG, nombreG, cursoG, nombreGrupo));
-                        System.out.println("✔ Grupo insertado.");
+                        insertarGrupo(sc, participanteDao);
                         break;
-
                     case 3:
-                        System.out.print("ID del participante: ");
-                        int idPart = Integer.parseInt(sc.nextLine());
-                        System.out.print("ID del grupo: ");
-                        int idGrp = Integer.parseInt(sc.nextLine());
-                        participanteGrupoDao.insertar(new ParticipanteGrupo(idPart, idGrp));
-                        System.out.println("✔ Relación insertada.");
+                        buscarPorCurso(sc, participanteDao);
                         break;
-
-
-                    case 5:
-                        System.out.println("=== Grupos ===");
-                        List<Grupo> grupos = grupoDao.listarTodos();
-                        grupos.forEach(System.out::println);
+                    case 4:
+                        modificarParticipante(sc, participanteDao);
                         break;
-
-                    case 6:
-                        System.out.println("=== Participantes en Grupos ===");
-                        List<ParticipanteGrupo> relaciones = participanteGrupoDao.listarTodos();
-                        relaciones.forEach(System.out::println);
-                        break;
-
                     case 0:
                         System.out.println("Saliendo del programa...");
                         break;
-
                     default:
                         System.out.println("Opción no válida.");
-                }}
-
-           ;
-
+                }
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private static void mostrarMenu() {
+        System.out.println("\n=== Menú de Gestión Deportiva ===");
+        System.out.println("1. Insertar participante individual");
+        System.out.println("2. Insertar grupo");
+        System.out.println("3. Buscar participantes por curso");
+        System.out.println("4. Modificar participante o grupo");
+        System.out.println("0. Salir");
+        System.out.print("Elige una opción: ");
+    }
+
+    private static void insertarParticipanteIndividual(Scanner sc, ParticipanteDaoImpl participanteDao) {
+        System.out.print("Nombre completo: ");
+        String nombre = sc.nextLine();
+        System.out.print("Curso: ");
+        String curso = sc.nextLine();
+
+        ParticipanteIndividual participante = new ParticipanteIndividual();
+        participante.setNombre(nombre);
+        participante.setCurso(curso);
+
+        try {
+            boolean exito = participanteDao.insertarIndividual(participante);
+            if (exito) {
+                System.out.println("✔ Participante individual insertado.");
+            } else {
+                System.out.println("✖ Error al insertar participante individual.");
+            }
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    private static void insertarGrupo(Scanner sc, ParticipanteDaoImpl participanteDao) {
+        System.out.print("Nombre del grupo: ");
+        String nombreGrupo = sc.nextLine();
+        System.out.print("Curso: ");
+        String curso = sc.nextLine();
+
+        Grupo grupo = new Grupo();
+        grupo.setNombreGrupo(nombreGrupo);
+        grupo.setCurso(curso);
+
+        // Aquí puedes agregar lógica para ingresar miembros al grupo
+        for (int i = 1; i <= 5; i++) {
+            System.out.print("Nombre del miembro " + i + ": ");
+            String nombreMiembro = sc.nextLine();
+            ParticipanteIndividual miembro = new ParticipanteIndividual();
+            miembro.setNombre(nombreMiembro);
+            miembro.setCurso(curso);
+            grupo.getMiembros().add(miembro);
+        }
+
+        try {
+            boolean exito = participanteDao.insertarGrupo(grupo);
+            if (exito) {
+                System.out.println("✔ Grupo insertado.");
+            } else {
+                System.out.println("✖ Error al insertar grupo.");
+            }
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    private static void buscarPorCurso(Scanner sc, ParticipanteDaoImpl participanteDao) {
+        System.out.print("Ingrese el curso: ");
+        String curso = sc.nextLine();
+
+        try {
+            List<Participante> participantes = participanteDao.buscarPorCurso(curso);
+            System.out.println("=== Participantes en el curso " + curso + " ===");
+            for (Participante p : participantes) {
+                System.out.println(p);
+            }
+        } catch (Exception e) {
+            System.out.println("Error al buscar participantes: " + e.getMessage());
+        }
+    }
+
+    private static void modificarParticipante(Scanner sc, ParticipanteDaoImpl participanteDao) {
+        // Aquí deberías implementar la lógica para mostrar todos los participantes y permitir la modificación
+        // Por simplicidad, se omite en este ejemplo
+        System.out.println("Funcionalidad de modificación no implementada aún.");
     }
 }

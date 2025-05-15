@@ -1,107 +1,99 @@
 package dam.primero.dao;
 
-import dam.primero.modelos.*;
+import dam.primero.modelos.Participante;
+import dam.primero.modelos.ParticipanteIndividual;
+import dam.primero.contralodor.GestionaQueriesBaseDatos;
+import dam.primero.modelos.Grupo;
+
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-public class ParticipanteDaoImpl  {
+public class ParticipanteDaoImpl {
+    private JdbcDao jdbcdao;
 
-private 	JdbcDao jdbcdao;
-	// Insertar participante individual
-    public boolean insertarIndividual(ParticipanteIndividual individual) throws SQLException {
-        Connection conn = null;
-        try {
-            conn = jdbcdao.getConnection();
-            conn.setAutoCommit(false);
+    public ParticipanteDaoImpl() throws Exception {
+        jdbcdao = new JdbcDao(); // Inicializa la conexión a la base de datos
+    }
 
-            // 1. Insertar en tabla Participantes
-            String sqlParticipante = "INSERT INTO Participantes (Nombre, Curso, Tipo) VALUES (?, ?, 'INDIVIDUAL')";
-            try (PreparedStatement stmt = conn.prepareStatement(sqlParticipante, Statement.RETURN_GENERATED_KEYS)) {
-                stmt.setString(1, individual.getNombre());
-                stmt.setString(2, individual.getCurso());
-                
-                int affectedRows = stmt.executeUpdate();
-                if (affectedRows == 0) {
-                    throw new SQLException("Error al insertar participante, ninguna fila afectada.");
-                }
+    // 1. Insertar participante individual
+    public boolean insertarIndividual(Participante p) throws SQLException {
+		System.out.println(p);
 
-                try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
-                    if (generatedKeys.next()) {
-                        individual.setId(generatedKeys.getInt(1));
-                    } else {
-                        throw new SQLException("Error al obtener ID generado.");
-                    }
+        String sql = "INSERT INTO participantes (nombre, curso, tipo) VALUES (?, ?, 'INDIVIDUAL')";
+        
+        try (Connection conn = jdbcdao.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            
+            stmt.setString(1, p.getNombre());
+            stmt.setString(2, p.getCurso());
+            System.out.println(p.getNombre());
+            System.out.println(p.getCurso());
+            System.out.println(sql);
+            
+            int affectedRows = stmt.executeUpdate();
+            if (affectedRows == 0) {
+                throw new SQLException("Error al insertar participante individual");
+            }
+            
+            try (ResultSet rs = stmt.getGeneratedKeys()) {
+                if (rs.next()) {
+                    p.setId(rs.getInt(1));
                 }
             }
-
-            conn.commit();
             return true;
-        } catch (SQLException e) {
-            if (conn != null) {
-            	conn.rollback();
-         
-            }
-            throw e;
-        } finally {
-            if (conn != null) { 
-            	conn.setAutoCommit(true);
-            }
         }
     }
 
-    public boolean insertarGrupo(Grupo grupo, List<ParticipanteIndividual> miembros) throws SQLException {
-        if (miembros.size() > 5) {
-            throw new SQLException("Un grupo no puede tener más de 5 miembros");
+    // 2. Insertar grupo con 5 miembros
+    public boolean insertarGrupo(Grupo grupo) throws SQLException {
+        if (grupo.getMiembros().size() != 5) {
+            throw new SQLException("Debe haber exactamente 5 miembros en el grupo");
         }
-
+        
         Connection conn = null;
         try {
             conn = jdbcdao.getConnection();
             conn.setAutoCommit(false);
-
-            // 1. Insertar el grupo en Participantes
-            String sqlGrupo = "INSERT INTO Participantes (Nombre, Curso, Tipo) VALUES (?, ?, 'GRUPO')";
+            
+            // Insertar el grupo
+            String sqlGrupo = "INSERT INTO Participantes (nombre_grupo, curso, tipo) VALUES (?, ?, 'GRUPO')";
             int grupoId;
+            
             try (PreparedStatement stmt = conn.prepareStatement(sqlGrupo, Statement.RETURN_GENERATED_KEYS)) {
-                stmt.setString(1, grupo.getNombre());
+                stmt.setString(1, grupo.getNombreGrupo());
                 stmt.setString(2, grupo.getCurso());
+                stmt.executeUpdate();
                 
-                int affectedRows = stmt.executeUpdate();
-                if (affectedRows == 0) {
-                    throw new SQLException("Error al insertar grupo, ninguna fila afectada.");
-                }
-
-                try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
-                    if (generatedKeys.next()) {
-                        grupoId = generatedKeys.getInt(1);
+                try (ResultSet rs = stmt.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        grupoId = rs.getInt(1);
                         grupo.setId(grupoId);
                     } else {
-                        throw new SQLException("Error al obtener ID generado para el grupo.");
+                        throw new SQLException("Error al obtener ID del grupo");
                     }
                 }
             }
-
-            // 2. Insertar en tabla Grupos
-            String sqlDetalleGrupo = "INSERT INTO Grupos (Id_participante, Nombre_grupo) VALUES (?, ?)";
-            try (PreparedStatement stmt = conn.prepareStatement(sqlDetalleGrupo)) {
-                stmt.setInt(1, grupoId);
-                stmt.setString(2, grupo.getNombreGrupo());
-                stmt.executeUpdate();
-            }
-
-            // 3. Insertar miembros
-            String sqlMiembro = "INSERT INTO MiembrosGrupo (Id_grupo, Id_participante) VALUES (?, ?)";
-            try (PreparedStatement stmt = conn.prepareStatement(sqlMiembro)) {
-                for (ParticipanteIndividual miembro : miembros) {
-                    stmt.setInt(1, grupoId);
-                    stmt.setInt(2, miembro.getId());
-                    stmt.addBatch();
+            
+            // Insertar miembros
+            String sqlMiembro = "INSERT INTO Participantes (nombre_completo, curso, tipo) VALUES (?, ?, 'INDIVIDUAL')";
+            for (ParticipanteIndividual miembro : grupo.getMiembros()) {
+                try (PreparedStatement stmt = conn.prepareStatement(sqlMiembro, Statement.RETURN_GENERATED_KEYS)) {
+                    stmt.setString(1, miembro.getNombre());
+                    stmt.setString(2, grupo.getCurso());
+                    stmt.executeUpdate();
+                    
+                    try (ResultSet rs = stmt.getGeneratedKeys()) {
+                        if (rs.next()) {
+                            miembro.setId(rs.getInt(1));
+                        }
+                    }
                 }
-                stmt.executeBatch();
             }
-
+            
             conn.commit();
             return true;
+            
         } catch (SQLException e) {
             if (conn != null) conn.rollback();
             throw e;
@@ -109,104 +101,149 @@ private 	JdbcDao jdbcdao;
             if (conn != null) conn.setAutoCommit(true);
         }
     }
-
-    // Buscar por curso
+ // 3. Buscar participantes por curso
     public List<Participante> buscarPorCurso(String curso) throws SQLException {
-        List<Participante> participantes = new ArrayList<>();
-        String sql = "SELECT Id_participante, Nombre, Curso, Tipo FROM Participantes WHERE Curso = ?";
+        List<Participante> resultados = new ArrayList<>();
+        String sql = "SELECT * FROM Participantes WHERE curso = ?";
+
+        // Establecer conexión y preparar la consulta
+        try (Connection conn = jdbcdao.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            // Establecer el parámetro de la consulta
+            stmt.setString(1, curso);
+            
+            // Ejecutar la consulta y procesar los resultados
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    // Verificar el tipo de participante
+                    String tipo = rs.getString("tipo");
+                    if ("INDIVIDUAL".equals(tipo)) {
+                        // Crear y agregar un participante individual
+                        Participante participante = new Participante(
+                            rs.getString("nombre_completo"),
+                            curso // Asignar el curso directamente
+                        );
+                        resultados.add(participante);
+                    } else {
+                        // Crear y agregar un grupo
+                        Grupo grupo = new Grupo();
+                        grupo.setId(rs.getInt("id"));
+                        grupo.setNombreGrupo(rs.getString("nombre_grupo"));
+                        grupo.setCurso(curso); // Asignar el curso directamente
+                        grupo.setMiembros(obtenerMiembrosGrupo(grupo.getId()));
+                        resultados.add(grupo);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            // Manejo de excepciones
+            System.err.println("Error al buscar participantes por curso: " + e.getMessage());
+            throw e; // Re-lanzar la excepción para manejo externo
+        }
+        return resultados;
+    }
+
+    private List<ParticipanteIndividual> obtenerMiembrosGrupo(int id) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	// 4. Modificar participante o grupo
+  /*  public boolean actualizar(Participante p) throws SQLException {
+        if (p instanceof ParticipanteIndividual) {
+            String sql = "UPDATE Participantes SET nombre_completo = ?, curso = ? WHERE id = ? AND tipo = 'INDIVIDUAL'";
+            try (Connection conn = jdbcdao.getConnection();
+                 PreparedStatement stmt = conn.prepareStatement(sql)) {
+                
+                stmt.setString(1, ((ParticipanteIndividual) p).getNombre());
+                stmt.setString(2, p.getCurso());
+                stmt.setInt(3, p.getId());
+                
+                return stmt.executeUpdate() > 0;
+            }
+        } else if (p instanceof Grupo) {
+            Grupo grupo = (Grupo) p;
+            if (grupo.getMiembros().size() != 5) {
+                throw new SQLException("El grupo debe tener exactamente 5 miembros");
+            }
+            
+            Connection conn = null;
+            try {
+                conn = jdbcdao.getConnection();
+                conn.setAutoCommit(false);
+                
+                // Actualizar datos del grupo
+                String sqlGrupo = "UPDATE Participantes SET nombre_grupo = ?, curso = ? WHERE id = ? AND tipo = 'GRUPO'";
+                try (PreparedStatement stmt = conn.prepareStatement(sqlGrupo)) {
+                    stmt.setString(1, grupo.getNombreGrupo());
+                    stmt.setString(2, grupo.getCurso());
+                    stmt.setInt(3, grupo.getId());
+                    stmt.executeUpdate();
+                }
+                
+                // Actualizar miembros
+                String sqlMiembro = "UPDATE Participantes SET nombre_completo = ?, curso = ? WHERE id = ? AND tipo = 'INDIVIDUAL'";
+                for (ParticipanteIndividual miembro : grupo.getMiembros()) {
+                    try (PreparedStatement stmt = conn.prepareStatement(sqlMiembro)) {
+                        stmt.setString(1, miembro.getNombre());
+                        stmt.setString(2, grupo.getCurso());
+                        stmt.setInt(3, miembro.getId());
+                        stmt.executeUpdate();
+                    }
+                }
+                
+                conn.commit();
+                return true;
+                
+            } catch (SQLException e) {
+                if (conn != null) conn.rollback();
+                throw e;
+            } finally {
+                if (conn != null) conn.setAutoCommit(true);
+            }
+        }
+        return false;
+    }*/
+    
+    public List<String> consultaNombresPorTipo(String tipo) throws SQLException {
+        List<String> nombres = new ArrayList<>();
+        String sql = "SELECT nombre FROM participantes WHERE tipo = ?";
+        try (Connection conn = jdbcdao.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, tipo);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    nombres.add(rs.getString("nombre"));
+                }
+            }
+        }
+        return nombres;
+    }
+
+	
+    
+    
+    // Método auxiliar para obtener miembros de un grupo
+  /*  private List<ParticipanteIndividual> obtenerMiembrosGrupo(int grupoId) throws SQLException {
+        List<ParticipanteIndividual> miembros = new ArrayList<>();
+        String sql = "SELECT p.* FROM Participantes p JOIN Grupo_Miembros gm ON p.id = gm.miembro_id WHERE gm.grupo_id = ?";
         
         try (Connection conn = jdbcdao.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
-            stmt.setString(1, curso);
+            stmt.setInt(1, grupoId);
             
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    String tipo = rs.getString("Tipo");
-                    Participante p;
-                    
-                    if ("INDIVIDUAL".equals(tipo)) {
-                        p = new ParticipanteIndividual(
-                            rs.getInt("Id_participante"),
-                            rs.getString("Nombre"),
-                            rs.getString("Curso")
-                        );
-                    } else {
-                        p = new Grupo(
-                            rs.getInt("Id_participante"),
-                            rs.getString("Nombre"),
-                            rs.getString("Curso"),
-                            obtenerNombreGrupo(rs.getInt("Id_participante"))
-                        );
-                    }
-                    participantes.add(p);
+                    miembros.add(new ParticipanteIndividual(
+                        rs.getInt("id"),
+                        rs.getString("nombre_completo"),
+                        rs.getString("curso")
+                    ));
                 }
             }
         }
-        return participantes;
-    }
-
-    // Obtener nombre del grupo
-    private String obtenerNombreGrupo(int idGrupo) throws SQLException {
-        String sql = "SELECT Nombre_grupo FROM Grupos WHERE Id_participante = ?";
-        try (Connection conn = jdbcdao.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
-            stmt.setInt(1, idGrupo);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getString("Nombre_grupo");
-                }
-            }
-        }
-        return null;
-    }
-
-    // Actualizar participante
-    public boolean actualizarParticipante(Participante participante) throws SQLException {
-        String sql = "UPDATE Participantes SET Nombre = ?, Curso = ? WHERE Id_participante = ?";
-        
-        try (Connection conn = jdbcdao.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
-            stmt.setString(1, participante.getNombre());
-            stmt.setString(2, participante.getCurso());
-            stmt.setInt(3, participante.getId());
-            
-            return stmt.executeUpdate() > 0;
-        }
-    }
-
-    // Obtener todos los participantes
-    public List<Participante> obtenerTodos() throws SQLException {
-        List<Participante> participantes = new ArrayList<>();
-        String sql = "SELECT Id_participante, Nombre, Curso, Tipo FROM Participantes";
-        
-        try (Connection conn = jdbcdao.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-            
-            while (rs.next()) {
-                String tipo = rs.getString("Tipo");
-                Participante p;
-                
-                if ("INDIVIDUAL".equals(tipo)) {
-                    p = new ParticipanteIndividual(
-                        rs.getInt("Id_participante"),
-                        rs.getString("Nombre"),
-                        rs.getString("Curso")
-                    );
-                } else {
-                    p = new Grupo(
-                        rs.getInt("Id_participante"),
-                        rs.getString("Nombre"),
-                        rs.getString("Curso"),
-                        obtenerNombreGrupo(rs.getInt("Id_participante"))
-                    );
-                }
-                participantes.add(p);
-            }
-        }
-        return participantes;
-    }
+        return miembros;
+    }*/
 }

@@ -12,12 +12,12 @@ public class Grupo extends Participante {
     }
 
     // Constructor, getters y setters
-    public Grupo(int id, String nombre, String curso, String nombreGrupo) {
-        super(id, nombre, curso, nombreGrupo); 	
+    public Grupo( String curso, String nombreGrupo) {
+        super( curso, nombreGrupo); 	
         this.tipo = "GRUPO";
         this.nombreGrupo = nombreGrupo;
     }
-}
+
 
 
 	public String getNombreGrupo() {

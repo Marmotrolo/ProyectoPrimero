@@ -8,7 +8,7 @@ public class ParticipanteIndividual extends Participante {
     }
 
 	public ParticipanteIndividual(int id, String nombre, String curso) {
-		super(id, nombre, curso, "INDIIVUAL");
+		super(nombre, curso, "INDIVUAL");
 	}
     
     

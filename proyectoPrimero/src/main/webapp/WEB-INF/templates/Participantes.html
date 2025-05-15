@@ -3,29 +3,28 @@
 <head>
   <meta charset="UTF-8">
   <title id="titulo">PARTICIPANTES</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style/style.css">
 </head>
 <body>
 
   <header>
-    <a href="https://blogsaverroes.juntadeandalucia.es/iestorrredelosguzmanes/"><img id="logo" src="logo.png" alt="Logo instituto"></a>
+    <a href="https://blogsaverroes.juntadeandalucia.es/iestorrredelosguzmanes/"><img id="logo" src="imagenes/logo.png" alt="Logo instituto"></a>
     <h1 id="titulo">PARTICIPANTES</h1>
     <div id="botones">
-      <a href="./index principal.html"><button>Inicio</button></a>
+       <button th:onclick="'location.href=\'' + @{/index} + '\''">Inicio</button>
       <button onclick="window.history.back()">Atrás</button>
     </div>
   </header>
 
   <div id="contenido">
     <div class="tarjeta">
-      <button  class="boton-tarjeta" onclick="location.href='altaparticipantes.individual.html'">Alta participante</button>
+     <button class="boton-tarjeta" th:onclick="'location.href=\'' + @{/altaParticipantes} + '\''">Alta Participante</button>
+    </div>
+  <div class="tarjeta">
+      <button class="boton-tarjeta" th:onclick="'location.href=\'' + @{/buscaParticipantes} + '\''" >Buscar participante</button>
     </div>
     <div class="tarjeta">
-      <button class="boton-tarjeta" onclick="location.href='busquedaparticipante.html'" >Buscar participante</button>
-    </div>
-    <div class="tarjeta">
-      <button class="boton-tarjeta" onclick="location.href='muestraparticipantes.html'" >Ver participantes</button>
-    </div>
+      <button class="boton-tarjeta" th:onclick="'location.href=\'' + @{/modificaParticipantes} + '\''" >Modificar participante</button>
   </div>
 
 </body>
